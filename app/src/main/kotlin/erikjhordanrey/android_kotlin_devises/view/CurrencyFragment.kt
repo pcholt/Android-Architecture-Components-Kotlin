@@ -39,7 +39,7 @@ class CurrencyFragment : Fragment() {
     fun newInstance() = CurrencyFragment()
   }
 
-  private var currenciesAdapter: ArrayAdapter<String>? = null
+  private lateinit var currenciesAdapter: ArrayAdapter<String>
   private var currencyFrom: String? = null
   private var currencyTo: String? = null
 
@@ -77,8 +77,8 @@ class CurrencyFragment : Fragment() {
       currencyList!!.forEach {
         currencies.add(it.code + "  " + it.country)
       }
-      currenciesAdapter!!.setDropDownViewResource(R.layout.item_spinner);
-      currenciesAdapter!!.notifyDataSetChanged()
+      currenciesAdapter.setDropDownViewResource(R.layout.item_spinner);
+      currenciesAdapter.notifyDataSetChanged()
     })
 
   }

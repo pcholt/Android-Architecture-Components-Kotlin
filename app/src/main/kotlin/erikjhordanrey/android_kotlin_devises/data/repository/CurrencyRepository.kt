@@ -18,9 +18,7 @@ package erikjhordanrey.android_kotlin_devises.data.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import erikjhordanrey.android_kotlin_devises.data.remote.CurrencyResponse
 import erikjhordanrey.android_kotlin_devises.data.remote.RemoteCurrencyDataSource
-import erikjhordanrey.android_kotlin_devises.data.room.CurrencyEntity
 import erikjhordanrey.android_kotlin_devises.data.room.RoomCurrencyDataSource
 import erikjhordanrey.android_kotlin_devises.domain.AvailableExchange
 import erikjhordanrey.android_kotlin_devises.domain.Currency
@@ -31,55 +29,48 @@ import javax.inject.Singleton
 
 @Singleton
 class CurrencyRepository @Inject constructor(
-    val roomCurrencyDataSource: RoomCurrencyDataSource,
-    val remoteCurrencyDataSource: RemoteCurrencyDataSource
-) : Repository {
+        val roomCurrencyDataSource: RoomCurrencyDataSource,
+        val remoteCurrencyDataSource: RemoteCurrencyDataSource
+) : Repository
+{
 
-  override fun getTotalCurrencies() = roomCurrencyDataSource.currencyDao().getCurrenciesTotal()
+    override fun getTotalCurrencies() = roomCurrencyDataSource.currencyDao().getCurrenciesTotal()
 
-  override fun addCurrencies() {
-    val currencyEntityList = RoomCurrencyDataSource.getAllCurrencies()
-    roomCurrencyDataSource.currencyDao().insertAll(currencyEntityList)
-  }
-
-  override fun getCurrencyList(): LiveData<List<Currency>> {
-    val roomCurrencyDao = roomCurrencyDataSource.currencyDao()
-    val mutableLiveData = MutableLiveData<List<Currency>>()
-    roomCurrencyDao.getAllCurrencies()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { currencyList ->
-          mutableLiveData.value = transform(currencyList)
-        }
-
-    return mutableLiveData
-  }
-
-  private fun transform(currencies: List<CurrencyEntity>): List<Currency> {
-    val currencyList = ArrayList<Currency>()
-    currencies.forEach {
-      currencyList.add(Currency(it.countryCode, it.countryName))
+    override fun addCurrencies()
+    {
+        roomCurrencyDataSource.currencyDao().insertAll(RoomCurrencyDataSource.allCurrencies)
     }
-    return currencyList
-  }
 
-  override fun getAvailableExchange(currencies: String): LiveData<AvailableExchange> {
-    val mutableLiveData = MutableLiveData<AvailableExchange>()
-    remoteCurrencyDataSource.requestAvailableExchange(currencies)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { currencyResponse ->
-          if (currencyResponse.isSuccess) {
-            mutableLiveData.value = transform(currencyResponse)
-          } else {
-            throw Throwable("CurrencyRepository -> on Error occurred")
-          }
-        }
-    return mutableLiveData
-  }
+    override fun getCurrencyList(): LiveData<List<Currency>>
+    {
+        val roomCurrencyDao = roomCurrencyDataSource.currencyDao()
+        val mutableLiveData = MutableLiveData<List<Currency>>()
+        roomCurrencyDao.getAllCurrencies()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { currencyList ->
+                mutableLiveData.value = currencyList.map {
+                    Currency(it.countryCode, it.countryName)
+                }
+            }
 
-  private fun transform(exchangeMap: CurrencyResponse): AvailableExchange {
-    return AvailableExchange(exchangeMap.currencyQuotes)
-  }
+        return mutableLiveData
+    }
+
+    override fun getAvailableExchange(currencies: String): LiveData<AvailableExchange>
+    {
+        val mutableLiveData = MutableLiveData<AvailableExchange>()
+        remoteCurrencyDataSource.requestAvailableExchange(currencies)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                when
+                {
+                    it.isSuccess -> mutableLiveData.value = AvailableExchange(it.currencyQuotes)
+                    else         -> throw Throwable("CurrencyRepository -> on Error occurred")
+                }
+            }
+        return mutableLiveData
+    }
 
 }

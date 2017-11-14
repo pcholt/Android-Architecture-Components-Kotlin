@@ -21,8 +21,8 @@ import android.arch.persistence.room.PrimaryKey
 
 @Entity(tableName = RoomContract.TABLE_CURRENCIES)
 data class CurrencyEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
     var countryCode: String,
-    var countryName: String
+    var countryName: String,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0L
 )
 
