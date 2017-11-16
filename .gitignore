@@ -8,3 +8,4 @@
 sdcard
 sdcard.lock
 libs/
+/keystore.properties

@@ -16,6 +16,8 @@
 
 package erikjhordanrey.android_kotlin_devises.data.remote
 
+import erikjhordanrey.android_kotlin_devises.BuildConfig
+
 class RemoteContract {
 
   companion object {
@@ -31,9 +33,12 @@ class RemoteContract {
     const val SUCCESS = "success"
     const val QUOTES = "quotes"
 
-    // I should't expose the access key but it is to didactic use
-    const val ACCESS_KEY_API_LAYER = "be4554e86f3a5670b287ccc40f5bead8"
-    const val FORMAT_TYPE = "1"
+    // CurrencyApiKey value defined in keystore.properties OR the default value
+    val ACCESS_KEY_API_LAYER =  BuildConfig.CURRENCY_API_KEY
+//    val ACCESS_KEY_API_LAYER = "6455fa983e28b43fd66ca3a89f5e520e"
+
+
+            const val FORMAT_TYPE = "1"
   }
 
 }
